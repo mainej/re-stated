@@ -72,17 +72,12 @@ To satisfy the first requirement, we want:
      (fn [state-map _]
        (state/state state-map)))
    ```
-4. A function that removes a state-map from a db. For use within an event
-   handler.
-   ```clojure
-   (rf/dissoc-in db [:some :where])
-   ```
 
 For the second requirement, we want:
 1. Event handlers that call these functions. For dispatching state events from a
    router, component or another event handler.
    ```clojure
-   [:state/initialize [:some :where] fsm {:contextual "data"}]
+   [:state/initialize [:some :where] {:contextual "data"} fsm]
    [:state/transition [:some :where] fsm :fsm-event]
    ```
 2. Event interceptors that augment normal events such that when they're
@@ -90,7 +85,7 @@ For the second requirement, we want:
    after the event?) For dispatching regular events, events that should also
    trigger state events.
    ```clojure
-   (state/initialize-after [:some :where] fsm {:contextual "data"})
+   (state/initialize-after [:some :where] {:contextual "data"} fsm)
    (state/transition-after [:some :where] fsm :fsm-event)
    ```
 
