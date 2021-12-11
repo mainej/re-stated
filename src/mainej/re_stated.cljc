@@ -50,8 +50,9 @@
 (re-frame/reg-event-db
  :state/transition re-frame/trim-v
  (fn [db [state-map-path fsm state-event & data]]
-   (let [state-event (statecharts.utils/ensure-event-map state-event)]
-     (transition-in db state-map-path fsm (assoc state-event :data data)))))
+   (transition-in db state-map-path fsm (-> state-event
+                                            statecharts.utils/ensure-event-map
+                                            (assoc :data data)))))
 
 ;;;; Event augmenters
 
