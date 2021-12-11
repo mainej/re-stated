@@ -50,18 +50,15 @@ How does a state machine interact with the outside world? Actions.
 ## Implementation
 
 To satisfy the first requirement, we want:
-1. A function that, when given an fsm and some (optional) context, initializes a
-   state-map. For use within an event handler.
+1. A function that, when given a db, db-path, fsm, and some (optional) context,
+   initializes a state-map and stores it at the db-path. For use within an event
+   handler.
    ```clojure
-   (assoc-in db [:some :where] (state/initialize {:contextual "data"} fsm))
-   ;; and, a shorthand for the same thing:
-   (state/initialize-in db [:some :where] {:contextual "data"} fsm)
+   (state/initialize-in db [:some :where] fsm {:contextual "data"})
    ```
-2. A function that, when given a state-map, fsm and state event transitions
-   the state-map. For use within an event handler.
+2. A function that, when given a db, db-path, fsm and state event transitions
+   the state-map stored at the db-path. For use within an event handler.
    ```clojure
-   (update-in db [:some :where] state/transition fsm :fsm-event)
-   ;; and, a shorthand for the same thing:
    (state/transition-in db [:some :where] fsm :fsm-event)
    ```
 3. Facilities for reading state and constructing subscriptions to state.
@@ -77,7 +74,7 @@ For the second requirement, we want:
 1. Event handlers that call these functions. For dispatching state events from a
    router, component or another event handler.
    ```clojure
-   [:state/initialize [:some :where] {:contextual "data"} fsm]
+   [:state/initialize [:some :where] fsm {:contextual "data"}]
    [:state/transition [:some :where] fsm :fsm-event]
    ```
 2. Event interceptors that augment normal events such that when they're
@@ -85,7 +82,7 @@ For the second requirement, we want:
    after the event?) For dispatching regular events, events that should also
    trigger state events.
    ```clojure
-   (state/initialize-after [:some :where] {:contextual "data"} fsm)
+   (state/initialize-after [:some :where] fsm {:contextual "data"})
    (state/transition-after [:some :where] fsm :fsm-event)
    ```
 
