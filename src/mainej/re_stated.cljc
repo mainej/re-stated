@@ -71,7 +71,13 @@
 
 ;;;; Actions
 
-(defn dispatch-context-action [evt-path]
+(defn dispatch-by [f]
   (fn [state state-event]
-    (re-frame/dispatch (into (get-in state evt-path)
+    (re-frame/dispatch (into (f state state-event)
                              [state state-event]))))
+
+(defn dispatch-in [evt-path]
+  (dispatch-by (fn [state _] (get-in state evt-path))))
+
+(defn dispatch [event-v]
+  (dispatch-by (constantly event-v)))

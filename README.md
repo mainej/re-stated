@@ -90,14 +90,14 @@ To satisfy the third requirement, we want:
 1. clj-statecharts actions that dispatch fixed re-frame events. For use in
    transition/entry/exit actions.
    ```clojure
-   (state/dispatch-action [:re-frame-event])
+   (state/dispatch [:re-frame-event])
    ```
 2. clj-statecharts actions that dispatch re-frame events stored in the
    state-map. For use in transition/entry/exit actions. By allowing the
    state-map to control the event, one state machine can be used to manage
    several state-maps.
    ```clojure
-   (state/dispatch-context-action [:some :action/saved-in-context])
+   (state/dispatch-in [:some :action/saved-in-context])
    ```
 
 ## License

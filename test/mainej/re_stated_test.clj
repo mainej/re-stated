@@ -83,7 +83,7 @@
                                                :states  {:waiting {:after [{:delay  1000
                                                                             :target :loading}]}
                                                          :loading {:entry [(statecharts/assign update-retries)
-                                                                           (state/dispatch-context-action [:retry-evt])]
+                                                                           (state/dispatch-in [:retry-evt])]
                                                                    :on    {:error   [{:guard  retries-left?
                                                                                       :target :waiting}
                                                                                      [:> :error :halted]]
@@ -120,7 +120,7 @@
  (fn [db [_ id]]
    (state/transition-in db [:ex3/state-maps id] retrying-machine :error)))
 
-(t/deftest control-re-frame-via-state-machine-actions
+(t/deftest control-re-frame-via-state-map-actions
   (rf.t/run-test-sync
    (rf/dispatch [:ex3.command/start-http 1]) ;; initial request, immediately fails
    (t/is (= 1 (<sub [:ex3/requests 1])))
@@ -131,3 +131,24 @@
    (advance-clock 1000) ;; second retry, immediately fails
    (t/is (= 3 (<sub [:ex3/requests 1])))
    (t/is (= [:error :halted] (<sub [:ex3/state 1])))))
+
+(def results-machine
+  "A machine that stores some results in the app db"
+  (state/machine
+   {:id      :loading
+    :initial :loading
+    :states  {:loading {:on {:done :loaded}}
+              :loaded  {:entry (state/dispatch [:ex4.command/save-data])}}}))
+
+(rf/reg-event-db
+ :ex4.command/save-data
+ (fn [db [_ _state {:keys [data]}]]
+   (assoc db :data data)))
+
+(rf/reg-sub :ex4/data (fn [db _] (get db :data)))
+
+(t/deftest control-re-frame-via-actions
+  (rf.t/run-test-sync
+   (rf/dispatch [:state/initialize [:ex4/state-map] results-machine])
+   (rf/dispatch [:state/transition [:ex4/state-map] results-machine :done :one :two])
+   (t/is (= [:one :two] (<sub [:ex4/data])))))
