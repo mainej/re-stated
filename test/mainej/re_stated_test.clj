@@ -10,7 +10,7 @@
 (def loading-machine
   "A machine that keeps track of whether an attempt at loading succeeded or failed"
   (state/machine
-   {:id      :http
+   {:id      :loading
     :initial :loading
     :states  {:loading {:on {:error   :error
                              :success :loaded}}
@@ -60,24 +60,29 @@
   (statecharts.sim/advance clock ms))
 
 (def retrying-machine
-  "A machine that retries twice before halting."
+  "A machine that retries twice (by default) before halting.
+
+  Always retries at least once.
+
+  Control the number of retries and the event that is retried by setting
+  `:retries` and `:retry-evt` respectively in the state-map. "
   (state/machine
-   {:id      :http-with-retries
+   {:id      :retrying
     :initial :loading
     :states  {:loading {:on {:error   :error
                              :success :loaded}}
               :error   {:initial :retrying
                         :states  {:retrying (letfn [(reset-retries [state-map _]
-                                                      (assoc state-map :retries 0))
-                                                    (increment-retries [state-map _]
-                                                      (update state-map :retries inc))
+                                                      (update state-map :retries #(or % 2)))
+                                                    (update-retries [state-map _]
+                                                      (update state-map :retries dec))
                                                     (retries-left? [{:keys [retries]} _]
-                                                      (< retries 2))]
+                                                      (pos? retries))]
                                               {:entry   (statecharts/assign reset-retries)
                                                :initial :waiting
                                                :states  {:waiting {:after [{:delay  1000
                                                                             :target :loading}]}
-                                                         :loading {:entry [(statecharts/assign increment-retries)
+                                                         :loading {:entry [(statecharts/assign update-retries)
                                                                            (state/dispatch-context-action [:retry-evt])]
                                                                    :on    {:error   [{:guard  retries-left?
                                                                                       :target :waiting}

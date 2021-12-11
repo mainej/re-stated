@@ -1,7 +1,12 @@
 (ns mainej.re-stated
-  (:require [statecharts.core :as statecharts]
-            [statecharts.delayed]
-            [re-frame.core :as re-frame]))
+  (:require
+   [re-frame.core :as re-frame]
+   [statecharts.clock]
+   [statecharts.core :as statecharts]
+   [statecharts.delayed]
+   [statecharts.utils]))
+
+(def ^:private state-map-path-key ::path)
 
 (defn machine
   ([spec] (machine spec nil))
@@ -11,9 +16,9 @@
    (let [!machine  (atom (statecharts/machine spec))
          scheduler (statecharts.delayed/make-scheduler
                     (fn [state delayed-event]
-                      (re-frame/dispatch [:state/transition (::state-map-path state) @!machine delayed-event]))
-                    clock
-                    ::state-map-path)]
+                      (re-frame/dispatch [:state/transition (state-map-path-key state) @!machine delayed-event]))
+                    (or clock (statecharts.clock/wall-clock))
+                    state-map-path-key)]
      (swap! !machine assoc :scheduler scheduler)
      @!machine)))
 
@@ -21,13 +26,13 @@
 
 (def state :_state)
 
-(defn- initialize [fsm context]
-  (statecharts/initialize fsm {:context context}))
+(defn- initialize [fsm state-map]
+  (statecharts/initialize fsm {:context state-map}))
 
 (defn initialize-in
   ([db state-map-path fsm] (initialize-in db state-map-path fsm nil))
-  ([db state-map-path fsm context]
-   (assoc-in db state-map-path (initialize fsm (assoc context ::state-map-path state-map-path)))))
+  ([db state-map-path fsm state-map]
+   (assoc-in db state-map-path (initialize fsm (assoc state-map state-map-path-key state-map-path)))))
 
 (defn- transition [state fsm state-event]
   (statecharts/transition fsm state state-event))
@@ -38,26 +43,25 @@
 ;;;; Event handlers
 
 (re-frame/reg-event-db
- :state/initialize
- re-frame/trim-v
- (fn [db [state-map-path fsm context]]
-   (initialize-in db state-map-path fsm context)))
+ :state/initialize re-frame/trim-v
+ (fn [db [state-map-path fsm state-map]]
+   (initialize-in db state-map-path fsm state-map)))
 
 (re-frame/reg-event-db
- :state/transition
- re-frame/trim-v
- (fn [db [state-map-path fsm state-event]]
-   (transition-in db state-map-path fsm state-event)))
+ :state/transition re-frame/trim-v
+ (fn [db [state-map-path fsm state-event & data]]
+   (let [state-event (statecharts.utils/ensure-event-map state-event)]
+     (transition-in db state-map-path fsm (assoc state-event :data data)))))
 
 ;;;; Event augmenters
 
 (defn initialize-after
   ([state-map-path fsm]
    (initialize-after state-map-path fsm nil))
-  ([state-map-path fsm state-context]
+  ([state-map-path fsm state-map]
    (re-frame/enrich
     (fn [db _]
-      (initialize-in db state-map-path fsm state-context)))))
+      (initialize-in db state-map-path fsm state-map)))))
 
 (defn transition-after [state-map-path fsm state-event]
   (re-frame/enrich
