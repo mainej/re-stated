@@ -1,12 +1,20 @@
-# com.github.mainej/re-stated
+A small and powerful toolset that brings state machines to re-frame.
+
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.mainej/re-stated.svg)](https://clojars.org/com.github.mainej/re-stated)
 
 State machines add organizational structure to code, potentially simplifying
 complex interactions. There has been a small explosion of approaches to
 integrating [`clj-statecharts`](https://lucywang000.github.io/clj-statecharts/)
-with [`re-frame`](https://day8.github.io/re-frame/). But many of these
-approaches are more convoluted than strictly necessary. (See for example, my own
-earlier attempt
+with [`re-frame`](https://day8.github.io/re-frame/).
+
+But many of these approaches are more convoluted than strictly necessary. (See
+for example, my own earlier attempt
 [`clj-statecharts-re-frame`](https://github.com/mainej/clj-statecharts-re-frame).)
+Even `clj-statechart`s [own
+integration](https://lucywang000.github.io/clj-statecharts/docs/integration/re-frame/)
+with `re-frame` leaves something to be desired. It leaks memory and can't easily
+manage several states
+[ref](https://github.com/lucywang000/clj-statecharts/pull/7).
 
 Let's go back to basics to build a truly minimal integration. That is, let's
 re-state ;) the problem:
