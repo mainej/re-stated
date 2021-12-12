@@ -4,9 +4,9 @@ State machines add organizational structure to code, potentially simplifying
 complex interactions. There has been a small explosion of approaches to
 integrating [`clj-statecharts`](https://lucywang000.github.io/clj-statecharts/)
 with [`re-frame`](https://day8.github.io/re-frame/). But many of these
-approaches are more convoluted than strictly necessary (see for example, my own
+approaches are more convoluted than strictly necessary. (See for example, my own
 earlier attempt
-[`clj-statecharts-re-frame`](https://github.com/mainej/clj-statecharts-re-frame).
+[`clj-statecharts-re-frame`](https://github.com/mainej/clj-statecharts-re-frame).)
 
 Let's go back to basics to build a truly minimal integration. That is, let's
 re-state ;) the problem:
@@ -17,12 +17,12 @@ re-state ;) the problem:
 
 First, a quick digression. Let's use this terminology.
 
-* **fsm**, or **machine** A machine is a specification of all the possible
+* **fsm**, or **machine**: A machine is a specification of all the possible
   states a process can be in and the transitions between those states.
-* **state** A state is a keyword or vector like `[:connecting :handshake]`. It
+* **state**: A state is a keyword or vector like `[:connecting :handshake]`. It
   represents a particular position within the machine: what state we're currently
   in.
-* **state-map** A state-map is a map that holds a state, e.g. `{:_state
+* **state-map**: A state-map is a map that holds a state, e.g. `{:_state
   [:connecting :handshake]}`. It can hold other contextual data which influences
   how the state is transitioned.
 
@@ -357,7 +357,7 @@ state machines too. What other tools will you build?
 
 ## Development
 
-See [CONTRIBUTING.md].
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
