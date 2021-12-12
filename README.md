@@ -1,4 +1,4 @@
-# io.github.mainej/re-stated
+# com.github.mainej/re-stated
 
 State machines add organizational structure to code, potentially simplifying
 complex interactions. There has been a small explosion of approaches to
@@ -354,6 +354,10 @@ state machines too. What other tools will you build?
   manage http requests. Many of the examples in this project mirror `glimt`'s
   capabilities, because I wanted to make sure `re-stated` was at least as
   powerful. With its narrower focus, `glimt` can be more concise in its domain.
+
+## Development
+
+See [CONTRIBUTING.md].
 
 ## License
 

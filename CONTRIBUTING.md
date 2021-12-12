@@ -1,0 +1,34 @@
+# Contributing
+
+TODO: establish contributing guidelines here.
+
+## Develop
+
+* Run `bin/test` to run tests.
+* Run `bin/coverage` for an updated code coverage report.
+
+## Deploy
+
+### Prepare
+
+To prepare for a release, run `bin/check-release`. The script will report what
+you can do to finish preparing, or if the release is ready, return an exit code
+of 0.
+
+It will check that you have done the following things:
+
+1. Gotten tests passing
+2. Proactively updated CHANGELOG.md
+3. Commited
+4. Tagged commit
+
+### Release
+
+Deploy to Clojars -- needs `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` environment
+variables:
+
+    $ envdir ../../env/clojars bin/clojars-release
+
+The library will be deployed to [clojars.org][clojars].
+
+[clojars]: https://clojars.org/com.github.mainej/re-stated
