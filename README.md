@@ -84,8 +84,8 @@ For the second requirement, we want:
 1. Pre-defined event handlers that call these functions. We'll dispatch these
    events from routers, components or other event handlers.
    ```clojure
-   [:state/initialize [:some :where] fsm {:contextual "data"}]
-   [:state/transition [:some :where] fsm :fsm-event]
+   [::state/initialize [:some :where] fsm {:contextual "data"}]
+   [::state/transition [:some :where] fsm :fsm-event]
    ```
 2. Event interceptors that augment normal event handlers such that when they're
    dispatched, a state-map is _also_ initialized or transitioned. We'll use

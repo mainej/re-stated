@@ -25,10 +25,10 @@
 
 (t/deftest control-state-via-re-stated-events
   (rf.t/run-test-sync
-   (rf/dispatch [:state/initialize [:ex1/state-map] loading-machine])
+   (rf/dispatch [::state/initialize [:ex1/state-map] loading-machine])
    (t/is (= :loading
             (<sub [:ex1/state])))
-   (rf/dispatch [:state/transition [:ex1/state-map] loading-machine :error])
+   (rf/dispatch [::state/transition [:ex1/state-map] loading-machine :error])
    (t/is (= [:error :halted]
             (<sub [:ex1/state])))))
 
@@ -149,6 +149,6 @@
 
 (t/deftest control-re-frame-via-actions
   (rf.t/run-test-sync
-   (rf/dispatch [:state/initialize [:ex4/state-map] results-machine])
-   (rf/dispatch [:state/transition [:ex4/state-map] results-machine :done :one :two])
+   (rf/dispatch [::state/initialize [:ex4/state-map] results-machine])
+   (rf/dispatch [::state/transition [:ex4/state-map] results-machine :done :one :two])
    (t/is (= [:one :two] (<sub [:ex4/data])))))

@@ -4,6 +4,17 @@ log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.2.14] - 2021-12-12
+
+### Changed
+* Changed namespace of re-frame events, to avoid conflicts with app namespaces.
+
+  To upgrade, change `:state/initialize` to `:mainej.re-stated/initialize`. Or,
+  if you were using the recommended require `[mainej.re-stated :as state]`,
+  change `:state/initialize` to `::state/initialize`.
+
+  Make similar changes for `:state/transition`.
+
 ## [0.1.9] - 2021-12-12
 
 Initial release.
@@ -15,5 +26,6 @@ Initial release.
 * State machine actions that dispatch re-frame events, i.e. when a state-map
   enters/exits/transitions between states.
 
-[Unreleased]: https://github.com/mainej/re-stated/compare/v0.1.9...HEAD
+[Unreleased]: https://github.com/mainej/re-stated/compare/v0.2.14...HEAD
+[0.2.14]: https://github.com/mainej/re-stated/compare/v0.1.9...v0.2.14
 [0.1.9]: https://github.com/mainej/re-stated/tree/v0.1.9

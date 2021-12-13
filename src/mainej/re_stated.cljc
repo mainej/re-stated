@@ -12,7 +12,7 @@
   "Returns a clj-statecharts state machine described by the spec.
 
   These machines' delayed events will only work if their states are created by
-  [[initialize-in]] or `:state/initialize`."
+  [[initialize-in]] or `::state/initialize`."
   ([spec] (machine spec nil))
   ([spec {:keys [clock]}]
    ;; The atom is a work around for a circular dependency in clj-statecharts
@@ -25,7 +25,7 @@
    (let [!machine  (atom (statecharts/machine spec))
          scheduler (statecharts.delayed/make-scheduler
                     (fn [state delayed-event]
-                      (re-frame/dispatch [:state/transition (state-map-path-key state) @!machine delayed-event]))
+                      (re-frame/dispatch [::transition (state-map-path-key state) @!machine delayed-event]))
                     (or clock (statecharts.clock/wall-clock))
                     state-map-path-key)]
      (swap! !machine assoc :scheduler scheduler)
@@ -67,7 +67,7 @@
 
 ;; Initialize a state map in the app-db at `state-map-path`, as per [[initialize-in]]
 (re-frame/reg-event-db
- :state/initialize re-frame/trim-v
+ ::initialize re-frame/trim-v
  (fn [db [state-map-path fsm state-map]]
    (initialize-in db state-map-path fsm state-map)))
 
@@ -75,7 +75,7 @@
 ;; [[transition-in]]. If the event vector is dispatched with any additional
 ;; result data, that will be available in the `:data` key of the `state-event`.
 (re-frame/reg-event-db
- :state/transition re-frame/trim-v
+ ::transition re-frame/trim-v
  (fn [db [state-map-path fsm state-event & data]]
    (transition-in db state-map-path fsm (-> state-event
                                             statecharts.utils/ensure-event-map

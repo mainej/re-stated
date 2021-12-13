@@ -7,7 +7,7 @@
 
 (def ^:private lib 'com.github.mainej/re-stated)
 (def ^:private rev-count (Integer/parseInt (b/git-count-revs nil)))
-(def ^:private semantic-version "0.1")
+(def ^:private semantic-version "0.2")
 (defn- format-version [revision] (format "%s.%s" semantic-version revision))
 (def ^:private version (format-version rev-count))
 (def ^:private next-version (format-version (inc rev-count)))
