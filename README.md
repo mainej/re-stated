@@ -138,7 +138,7 @@ like so:
  ;; no-op
  (fn [db [_ _error]] db))
 
-(re-frame/reg-sub 
+(re-frame/reg-sub
  :customers
  (fn [db _]
    (get-in db [:data :customers])))
@@ -179,17 +179,21 @@ completes successfully or unsuccessfully.
  ;; same as before
  ,,,)
  
-(re-frame/reg-sub 
+(re-frame/reg-sub
  :customers-request-status
- (fn [db _] 
+ (fn [db _]
    (get-in db [:requests :customers state/state])))
 
-(def customers-component []
+(defn customers-component []
   (case @(re-frame/subscribe [:customers-request-status])
+    nil      [:button {:type     "button"
+                       :on-click #(re-frame/dispatch [:command/fetch-customers])}
+              "start"]
     :loading [:div "loading..."]
     :error   [:div "oops! something went wrong"]
     :loaded  [:div (for [customer @(re-frame/subscribe [:customers])]
-                     [customer-component customer])]]))
+                     ^{:key (:id customer)}
+                     [customer-component customer])]))
 ```
 
 Nice! Now we can give users feedback while they're waiting for the fetch to
@@ -248,16 +252,17 @@ created earlier.
  (fn [db [_ id]]
    (get-in db [:data :customer-details id])))
  
-(def customer-component [{:keys [id]}]
-  (let [request-status @(re-frame/subscribe [:customer-request-status id])
-        customer-details @(re-frame/subscribe [:customer-details id])])
-  (case request-status
-    :loading [:div "loading..."]
-    :error   [:div "oops! something went wrong"]
-    :loaded  [:div "hi " (:nickname customer-details) "!"]]))
+(defn customer-component [{:keys [id]}]
+  (let [request-status   @(re-frame/subscribe [:customer-request-status id])
+        customer-details @(re-frame/subscribe [:customer-details id])]
+    (case request-status
+      nil      [:div "summary loaded..."]
+      :loading [:div "loading details..."]
+      :error   [:div "oops! something went wrong"]
+      :loaded  [:div "hi " (:nickname customer-details) "!"])))
 ```
 
-This was a little more complicated because we needed a customer id to
+This was a little more complicated because we needed a customer `id` to
 initialize, transition and read each request. But still, not so bad.
 
 ### Automatic retries
@@ -304,7 +309,7 @@ and whistles:
 ;; and enqueue the initial request.
 (re-frame/reg-event-fx
  :command/start-fetch-customers
- [(state/initialize-after [:requests :customers] loading-machine 
+ [(state/initialize-after [:requests :customers] retrying-machine
                           ;; on retry, re-fetch the customers
                           {:retry-evt [:command/fetch-customers]})]
  (fn [_ _]
@@ -323,29 +328,38 @@ and whistles:
                   
 (re-frame/reg-event-db
  :event/customers-fetched
- [(state/transition-after [:requests :customers] loading-machine :success)]
+ [(state/transition-after [:requests :customers] retrying-machine :success)]
  (fn [db [_ customers]]
    (assoc-in db [:data :customers] customers)))
 
 (re-frame/reg-event-db
  :event/customers-fetch-failed
  ;; This error will start the next request, if there are any retries left.
- [(state/transition-after [:requests :customers] loading-machine :error)]
+ [(state/transition-after [:requests :customers] retrying-machine :error)]
  (fn [db [_ _error]]
    db))
    
-;; This subscription now has more possible values, which the UI should 
-;; handle:
-;; * nil (not yet started)
-;; * :loading
-;; * [:error :retrying :waiting]
-;; * [:error :retrying :loading]
-;; * [:error :halted]
-;; * :loaded
-(re-frame/reg-sub 
+(re-frame/reg-sub
  :customers-request-status
- (fn [db _] 
-   (get-in db [:requests :customers state/state])))
+ (fn [db _]
+   (statecharts.utils/ensure-vector (get-in db [:requests :customers state/state]))))
+
+(defn customers-component []
+  (let [[request-status error-status retry-status] @(re-frame/subscribe [:customers-request-status])]
+    (case request-status
+      nil      [:button {:type     "button"
+                         :on-click #(re-frame/dispatch [:command/start-fetch-customers])}
+                "start"]
+      :loading [:div "loading..."]
+      :error   [:div "oops! something went wrong"
+                (case error-status
+                  :retrying (case retry-status
+                              :waiting [:div "please wait"]
+                              :loading [:div "retrying"])
+                  :halted   [:div "gave up"])]
+      :loaded  [:div (for [customer @(re-frame/subscribe [:customers])]
+                       ^{:key (:id customer)}
+                       [customer-component customer])])))
 ```
 
 Need to poll an API for updates? Or track how a user has interacted with an
