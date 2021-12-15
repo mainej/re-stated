@@ -380,7 +380,8 @@ and whistles:
 
 Need to clear request status after a few seconds? Or poll an API for updates? Or
 track how a user has interacted with an input field? Or walk a user through a
-wizard? These are great use cases for state machines too. What else will you
+wizard? These are great use cases for state machines too. Find working examples
+of some of them in the [examples](/examples) directory. What else will you
 build?
 
 ## Inspiration

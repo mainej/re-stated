@@ -1,0 +1,11 @@
+{:deps {:aliases [:cljs]}
+
+ :nrepl    {:port 8777}
+ :dev-http {8280 "resources/public"}
+
+ :builds {:app {:target     :browser
+                :output-dir "resources/public/js/compiled"
+                :asset-path "/js/compiled"
+                :modules    {:app {:init-fn examples.core/init}}
+                :devtools   {:preloads []}
+                :dev        {:compiler-options {:closure-defines {}}}}}}
