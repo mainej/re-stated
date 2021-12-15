@@ -3,7 +3,6 @@
   (:require [examples.utils :as utils]
             [re-frame.core :as re-frame]
             [reagent.core :as reagent]
-            [headlessui-reagent.core :as ui]
             [mainej.re-stated :as state]))
 
 (defn state-pristine? [{:keys [value initial-value]} _]
@@ -29,7 +28,7 @@
               :field/modified? {:initial :false
                                 :states  {:false {:on {:changed :true}}
                                           :true  {:on {}}}}
-              ;; is the input's value the same as was originally?
+              ;; is the input's value the same as it was originally?
               :field/pristine? {:initial :true
                                 :states  {:false {:on {:changed [{:guard  state-pristine?
                                                                   :target :true}]}}
@@ -62,17 +61,6 @@
 (defn on-blur [input-id] (input-evt input-id :focus-lost))
 (defn on-change [input-id val] (re-frame/dispatch [:change-input input-id val]))
 
-(defn toggle [label enabled?]
-  [ui/switch-group
-   [:div.flex
-    [ui/switch {:checked  enabled?
-                :disabled true
-                :class    [(if enabled? :bg-blue-600 :bg-gray-200)
-                           :relative :inline-flex :items-center :h-6 :rounded-full :w-11 :transition-colors]}
-     [:span.inline-block.w-4.h-4.transform.bg-white.rounded-full.transition-transform
-      {:class (if enabled? :translate-x-6 :translate-x-1)}]]
-    [ui/switch-label {:class [:ml-3]} label]]])
-
 (defn main-panel []
   (reagent/with-let [input-id :lang
                      _ (re-frame/dispatch [:init-input input-id "Clojure"])
@@ -92,4 +80,6 @@
                        :field/modified?
                        :field/pristine?]]
           ^{:key state-k}
-          [toggle (name state-k) (= :true (state-k input-state))])]])))
+          [utils/toggle {:checked  (= :true (state-k input-state))
+                         :disabled true}
+           (name state-k)])]])))
