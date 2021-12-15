@@ -22,26 +22,26 @@ removing this link until https://github.com/mainej/re-stated/issues/1 is resolve
 
 State machines add organizational structure to code, potentially simplifying
 complex interactions. There has been a small explosion of approaches to
-integrating [`clj-statecharts`](https://lucywang000.github.io/clj-statecharts/)
-with [`re-frame`](https://day8.github.io/re-frame/).
+integrating [clj-statecharts](https://lucywang000.github.io/clj-statecharts/)
+with [re-frame](https://day8.github.io/re-frame/).
 
 But many of these approaches are more convoluted than strictly necessary. (See
 for example, my own earlier attempt
-[`clj-statecharts-re-frame`](https://github.com/mainej/clj-statecharts-re-frame).)
-Even `clj-statechart`s [own
+[clj-statecharts-re-frame](https://github.com/mainej/clj-statecharts-re-frame).)
+Even clj-statecharts [own
 integration](https://lucywang000.github.io/clj-statecharts/docs/integration/re-frame/)
-with `re-frame` leaves something to be desired. It leaks memory and can't easily
+with re-frame leaves something to be desired. It leaks memory and can't easily
 manage several states
-[ref](https://github.com/lucywang000/clj-statecharts/pull/7).
+([ref](https://github.com/lucywang000/clj-statecharts/pull/7)).
 
 Let's go back to basics to build a truly minimal integration. That is, let's
-re-state ;) the problem:
+__re-state_ the problem.
 
 ## Analysis
 
 ### Terminology
 
-First, a quick digression. Let's use this terminology.
+First, a quick digression. Let's use this terminology:
 
 * **fsm**, or **machine**: A machine is a specification of all the possible
   states a process can be in and the transitions between those states.
@@ -60,28 +60,28 @@ how state changes over time. For this, we use re-frame.
 A state-map is ... stateful. The word "state" is right there in its name.
 Where do we store state in a re-frame app? In the app-db, usually. So,
 
-* We need tools to initialize and transition a state-map and store it in the
-  app-db.
+* Event handlers need tools to initialize and transition a state-map and store
+  it in the app-db.
 
 And how do we modify the world in a re-frame app? Events, which lead to effects.
 
-* We should be able to dispatch re-frame events that initialize or transition a
-  state-map.
+* Routers, components and other event handlers need need to be able to dispatch
+  re-frame events that initialize or transition a state-map.
 
 How does a state machine interact with the outside world? Actions. 
 
-* A state machine should be able to dispatch re-frame events via actions, i.e.
-  when a state-map enters/exits/transitions between states.
+* State machine need to dispatch re-frame events via actions, i.e. when a
+  state-map enters/exits/transitions between states.
 
-Believe it or not, that's enough to build fairly complex state machines that
-interact with re-frame.
+Believe it or not, that's enough to build any kind of state machine that
+interacts with re-frame.
 
 ## Implementation
 
 To satisfy the first requirement, we want:
-1. A function that, when given a db, db-path, fsm, and some (optional) context,
-   initializes a state-map and stores it at the db-path. We'll use this function
-   within event handlers.
+1. A function that, when given a db, db-path, fsm, and some (optional)
+   contextual data, initializes a state-map and stores it at the db-path. We'll
+   use this function within event handlers.
    ```clojure
    (state/initialize-in db [:some :where] fsm {:contextual "data"})
    ```
@@ -91,7 +91,7 @@ To satisfy the first requirement, we want:
    ```clojure
    (state/transition-in db [:some :where] fsm :fsm-event)
    ```
-3. Facilities for reading and constructing subscriptions to state.
+3. Facilities for reading state and constructing subscriptions to it.
    ```clojure
    (re-frame/reg-sub
      :some-state
@@ -99,7 +99,7 @@ To satisfy the first requirement, we want:
    ```
 
 For the second requirement, we want:
-1. Pre-defined event handlers that call these functions. We'll dispatch these
+1. Pre-defined event handlers that call the above functions. We'll dispatch these
    events from routers, components or other event handlers.
    ```clojure
    [::state/initialize [:some :where] fsm {:contextual "data"}]
@@ -127,7 +127,7 @@ To satisfy the third requirement, we want:
    (state/dispatch-in [:some :action/saved-in-context])
    ```
 
-This is the contents of the `re-stated` toolchest. Now let's build something.
+This is the contents of the `re-stated` tool set. Now let's build something.
 
 ## Examples
 
@@ -283,7 +283,7 @@ initialize, transition and read each request. But still, not so bad.
 
 ### Automatic retries
 
-What if we notice our API is a little flaky and we want to automatically retry a
+What if we notice our API is a little flaky and want to automatically retry a
 few times before giving up? This sounds like something we can model in a state
 machine. It'll be similar to our `loading-machine`, but with a few more bells
 and whistles:
