@@ -1,7 +1,7 @@
-This directory contains a re-frame app with examples of interactions that work
-well when modeled as state machines.
+This directory contains examples of re-frame interactions that work well when
+modeled as state machines.
 
-These are just a starting place. You should adapt the machines showcased here to
+The machines showcased here are just a starting place. You should adapt them to
 your own policies.
 
 Or build your own machines. The tricky part is defining the machine's states and
@@ -29,11 +29,6 @@ Then open http://localhost:8280.
 
 There are two examples of strategies for tracking HTTP requests.
 
-Both examples are split into two pieces. The first is a namespace that aids in
-starting a generic request and tracks whether it succeeds or fails. The second
-is a re-frame component that uses the tools in that namespace to make one
-particular request.
-
 ### Clearing requests
 
 Sometimes you want to show a spinner while a request is in progress, then
@@ -45,7 +40,10 @@ To see how you might do this, see
 [`examples.clearing.request`](src/examples/clearing/request.cljs).
 
 Notice that `examples.clearing` is actually _less_ code than you would find in a
-typical re-frame app that uses `:http-xhrio`.
+typical re-frame app that uses `:http-xhrio`. By extracting generic
+request-processing tools into `examples.clearing.request`, we've minimized
+boilerplate and made it easier to extend this pattern to all the requests our
+app makes.
 
 ### Retrying requests
 
@@ -58,9 +56,10 @@ To see how you might do this, see
 
 ## Form inputs
 
-Forms can have complex rules about the UI of their inputs. For example, to avoid
-a "wall of red" it's common to show validation errors _only after_ an input has
-been visited at least once.
+Forms can have complex rules about the UI of their inputs. For example, a blank
+form is often mostly invalid. To avoid a "wall of red" when first viewing the
+form it's common to show validation errors _only after_ an input has been
+visited at least once.
 
 See [`examples.input`](src/examples/input.cljs) for a state machine that tracks
 how an input has been interacted with over time.
@@ -70,7 +69,8 @@ Form](https://final-form.org/docs/final-form/types/FieldState).
 
 ## Wizards
 
-Want to advance a user through a wizard, perhaps letting them retreat to prior steps?
+Want to advance a user through a wizard, perhaps letting them retreat to prior
+steps?
 
 See [`examples.wizard`](src/examples/wizard.cljs) for a state machine that
 models a checkout flow.
