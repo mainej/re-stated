@@ -11,10 +11,12 @@
   "A machine that walks through a checkout flow."
   (letfn [(complete [{step :_prev-state :as state} _event]
             (-> state
-                (update :incomplete (fnil disj #{}) step)
-                (update :complete (fnil conj #{}) step)))
+                (update :complete (fnil conj #{}) step)
+                (update :incomplete (fnil disj #{}) step)))
           (incomplete [{step :_prev-state :as state} _event]
-            (update state :incomplete (fnil conj #{}) step))
+            (-> state
+                (update :complete (fnil disj #{}) step)
+                (update :incomplete (fnil conj #{}) step)))
           (next-step [step]
             {:target  step
              :actions (statecharts/assign complete)})
