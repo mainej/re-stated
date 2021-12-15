@@ -18,27 +18,24 @@
       (update :on-failure #(or % [::error request-path]))))
 
 (def retrying-machine
-  "A machine that tries to recover from errors by retrying. Retries twice before
-  halting.
+  "A machine that tries to recover from errors by retrying.
 
-  Control the event that is retried by setting `:retry-evt` in the state-map."
+  Control the number of retries and the event that is retried by setting
+  `:retries` and `:retry-evt` respectively in the state-map. "
   (state/machine
    {:id      :retrying
     :initial :loading
     :states  {:loading {:on {:error   :error
                              :success :loaded}}
               :error   {:initial :retrying
-                        :states  {:retrying (letfn [(reset-retries [state-map _]
-                                                      (assoc state-map :retries 2))
-                                                    (update-retries [state-map _]
+                        :states  {:retrying (letfn [(decrement-retries [state-map _]
                                                       (update state-map :retries dec))
                                                     (retries-left? [{:keys [retries]} _]
                                                       (pos? retries))]
-                                              {:entry   (statecharts/assign reset-retries)
-                                               :initial :waiting
+                                              {:initial :waiting
                                                :states  {:waiting {:after [{:delay  1000
                                                                             :target :loading}]}
-                                                         :loading {:entry [(statecharts/assign update-retries)
+                                                         :loading {:entry [(statecharts/assign decrement-retries)
                                                                            (state/dispatch-in [:retry-evt])]
                                                                    :on    {:error   [{:guard  retries-left?
                                                                                       :target :waiting}
@@ -49,7 +46,8 @@
 
 (defn start [db request-path request-event]
   (state/initialize-in db (into [:requests] request-path) retrying-machine
-                       {:retry-evt request-event}))
+                       {:retry-evt request-event
+                        :retries 2}))
 
 (defn success [db request-path]
   (state/transition-in db (into [:requests] request-path) retrying-machine :success))

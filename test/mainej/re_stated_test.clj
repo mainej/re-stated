@@ -60,9 +60,7 @@
   (statecharts.sim/advance clock ms))
 
 (def retrying-machine
-  "A machine that retries twice (by default) before halting.
-
-  Always retries at least once.
+  "A machine that tries to recover from errors by retrying.
 
   Control the number of retries and the event that is retried by setting
   `:retries` and `:retry-evt` respectively in the state-map. "
@@ -72,14 +70,11 @@
     :states  {:loading {:on {:error   :error
                              :success :loaded}}
               :error   {:initial :retrying
-                        :states  {:retrying (letfn [(reset-retries [state-map _]
-                                                      (update state-map :retries #(or % 2)))
-                                                    (update-retries [state-map _]
+                        :states  {:retrying (letfn [(update-retries [state-map _]
                                                       (update state-map :retries dec))
                                                     (retries-left? [{:keys [retries]} _]
                                                       (pos? retries))]
-                                              {:entry   (statecharts/assign reset-retries)
-                                               :initial :waiting
+                                              {:initial :waiting
                                                :states  {:waiting {:after [{:delay  1000
                                                                             :target :loading}]}
                                                          :loading {:entry [(statecharts/assign update-retries)
@@ -102,7 +97,8 @@
    (let [send-http-event [:ex3.command/send-http id]]
      {:db (state/initialize-in db [:ex3/state-maps id]
                                retrying-machine
-                               {:retry-evt send-http-event})
+                               {:retry-evt send-http-event
+                                :retries   2})
       :fx [[:dispatch send-http-event]]})))
 
 (rf/reg-event-fx
