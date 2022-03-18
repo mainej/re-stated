@@ -27,7 +27,7 @@ It will check that you have done the following things:
 Deploy to Clojars -- needs `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` environment
 variables:
 
-    $ envdir ../../env/clojars bin/clojars-release
+    $ bin/clojars-release
 
 The library will be deployed to [clojars.org][clojars].
 

@@ -3,10 +3,24 @@
    [re-frame.core :as re-frame]
    [statecharts.clock]
    [statecharts.core :as statecharts]
-   [statecharts.delayed]
+   [statecharts.scheduler]
+   [statecharts.store]
    [statecharts.utils]))
 
 (def ^:private state-map-path-key ::path)
+
+(def ^:private store
+  "This store helps re-stated interface with the clj-statecharts scheduler. It
+  is not the appropriate way to initialize or transition state. Instead, use the
+  other functions in this namespace. To get the current value of the state,
+  create and use a re-frame subscription."
+  (reify
+    statecharts.store/IStore
+    ;; Implements only the parts of IStore needed by the StoreScheduler.
+    (unique-id [_this state-map]
+      (state-map-path-key state-map))
+    (transition [_this machine state-map event _opts]
+      (re-frame/dispatch [::transition (state-map-path-key state-map) machine event]))))
 
 (defn machine
   "Returns a clj-statecharts state machine described by the spec.
@@ -15,21 +29,9 @@
   [[initialize-in]] or `::state/initialize`."
   ([spec] (machine spec nil))
   ([spec {:keys [clock]}]
-   ;; The atom is a work around for a circular dependency in clj-statecharts
-   ;; between a machine and its scheduler.
-   ;; `transition` is passed a machine, so
-   ;; in case the transition leads to delayed events, the machine has to carry
-   ;; the scheduler. But the scheduler needs to refer to the machine in its
-   ;; dispatch function. One fix would be for the machine to pass itself to the
-   ;; `delayed/schedule` function (and on to the dispatch function).
-   (let [!machine  (atom (statecharts/machine spec))
-         scheduler (statecharts.delayed/make-scheduler
-                    (fn [state delayed-event]
-                      (re-frame/dispatch [::transition (state-map-path-key state) @!machine delayed-event]))
-                    (or clock (statecharts.clock/wall-clock))
-                    state-map-path-key)]
-     (swap! !machine assoc :scheduler scheduler)
-     @!machine)))
+   (-> spec
+       (assoc :scheduler (statecharts.scheduler/make-store-scheduler store clock))
+       statecharts/machine)))
 
 ;;;; APP-DB
 
