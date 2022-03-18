@@ -1,7 +1,7 @@
 (ns mainej.re-stated
   (:require
    [re-frame.core :as re-frame]
-   [statecharts.clock]
+   [statecharts.clock :as clock]
    [statecharts.core :as statecharts]
    [statecharts.scheduler]
    [statecharts.store]
@@ -28,7 +28,7 @@
   These machines' delayed events will only work if their states are created by
   [[initialize-in]] or `::state/initialize`."
   ([spec] (machine spec nil))
-  ([spec {:keys [clock]}]
+  ([spec {:keys [clock] :or {clock (clock/wall-clock)}}]
    (-> spec
        (assoc :scheduler (statecharts.scheduler/make-store-scheduler store clock))
        statecharts/machine)))

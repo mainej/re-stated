@@ -4,6 +4,9 @@ log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.2.25] - 2022-03-18
+* Fix delayed transitions by providing default clock.
+
 ## [0.2.22] - 2022-03-18
 * Updated to clj-statecharts 0.1.3.
 
@@ -29,7 +32,8 @@ Initial release.
 * State machine actions that dispatch re-frame events, i.e. when a state-map
   enters/exits/transitions between states.
 
-[Unreleased]: https://github.com/mainej/re-stated/compare/v0.2.22...HEAD
+[Unreleased]: https://github.com/mainej/re-stated/compare/v0.2.25...HEAD
+[0.2.25]: https://github.com/mainej/re-stated/compare/v0.2.22...v0.2.25
 [0.2.22]: https://github.com/mainej/re-stated/compare/v0.2.14...v0.2.22
 [0.2.14]: https://github.com/mainej/re-stated/compare/v0.1.9...v0.2.14
 [0.1.9]: https://github.com/mainej/re-stated/tree/v0.1.9
