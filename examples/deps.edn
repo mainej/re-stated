@@ -7,7 +7,8 @@
 
 
                                day8.re-frame/http-fx       {:mvn/version "v0.2.0"}
-                               com.github.mainej/re-stated {:git/tag "v0.2.14", :git/sha "846be25ae439460fc41128c72625b077a2880ea3"}
+                               com.github.mainej/re-stated {:mvn/version "0.2.22"
+                                                            #_#_:local/root ".."}
                                com.github.mainej/headlessui-reagent {:mvn/version "1.4.2.43"}
                                }}
            :cljs/dev {:extra-deps {thheller/shadow-cljs {:mvn/version "2.15.10"}}}}}

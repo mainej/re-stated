@@ -2,20 +2,11 @@ A small and powerful toolset that brings state machines to re-frame.
 
 ## Install
 
-<!--
-removing this link until https://github.com/mainej/re-stated/issues/1 is resolved
 [![Clojars Project](https://img.shields.io/clojars/v/com.github.mainej/re-stated.svg)](https://clojars.org/com.github.mainej/re-stated)
--->
 
 ```clojure
-;; deps.edn
-{:deps {com.github.mainej/re-stated {:git/tag "v0.2.14"
-                                     :git/sha "846be25ae439460fc41128c72625b077a2880ea3"}}}
-
-;; project file
 (ns my-ns
   (:require [mainej.re-stated :as state]))
-
 ```
 
 ## Background
