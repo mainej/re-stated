@@ -16,17 +16,17 @@ complex interactions. There has been a small explosion of approaches to
 integrating [clj-statecharts](https://lucywang000.github.io/clj-statecharts/)
 with [re-frame](https://day8.github.io/re-frame/).
 
-But many of these approaches are more convoluted than strictly necessary. (See
-for example, my own earlier attempt
+But many of these approaches are more convoluted than necessary. (See for
+example, my own earlier attempt
 [clj-statecharts-re-frame](https://github.com/mainej/clj-statecharts-re-frame).)
-Even clj-statecharts [own
+Even clj-statecharts' [own
 integration](https://lucywang000.github.io/clj-statecharts/docs/integration/re-frame/)
 with re-frame leaves something to be desired. It leaks memory and can't easily
 manage several states
 ([ref](https://github.com/lucywang000/clj-statecharts/pull/7)).
 
 Let's go back to basics to build a truly minimal integration. That is, let's
-__re-state_ the problem.
+_re-state_ the problem.
 
 ## Analysis
 
@@ -61,7 +61,7 @@ And how do we modify the world in a re-frame app? Events, which lead to effects.
 
 How does a state machine interact with the outside world? Actions. 
 
-* State machine need to dispatch re-frame events via actions, i.e. when a
+* State machines need to dispatch re-frame events via actions, i.e. when a
   state-map enters/exits/transitions between states.
 
 Believe it or not, that's enough to build any kind of state machine that
@@ -69,34 +69,35 @@ interacts with re-frame.
 
 ## Implementation
 
-To satisfy the first requirement, we want:
+To satisfy the first requirement—tools for use within event handlers—we want:
 1. A function that, when given a db, db-path, fsm, and some (optional)
-   contextual data, initializes a state-map and stores it at the db-path. We'll
+   contextual data, **initializes** a state-map and stores it at the db-path. We'll
    use this function within event handlers.
    ```clojure
    (state/initialize-in db [:some :where] fsm {:contextual "data"})
    ```
-2. A function that, when given a db, db-path, fsm and state event transitions
+2. A function that, when given a db, db-path, fsm and state event **transitions**
    the state-map stored at the db-path. We'll use this function within event
    handlers.
    ```clojure
    (state/transition-in db [:some :where] fsm :fsm-event)
    ```
-3. Facilities for reading state and constructing subscriptions to it.
+3. Facilities for reading and **subscribing** to the current state.
    ```clojure
    (re-frame/reg-sub
      :some-state
      (fn [db _] (get-in db [:some :where state/state])))
    ```
 
-For the second requirement, we want:
-1. Pre-defined event handlers that call the above functions. We'll dispatch these
+For the second requirement—events to dispatch from routers, components and other
+event handlers—we want:
+1. Pre-defined **events** that call the above functions. We'll dispatch these
    events from routers, components or other event handlers.
    ```clojure
    [::state/initialize [:some :where] fsm {:contextual "data"}]
    [::state/transition [:some :where] fsm :fsm-event]
    ```
-2. Event interceptors that augment normal event handlers such that when they're
+2. Event **interceptors** that augment normal event handlers such that when they're
    dispatched, a state-map is _also_ initialized or transitioned. We'll use
    these to enhance existing events.
    ```clojure
@@ -104,7 +105,7 @@ For the second requirement, we want:
    (state/transition-after [:some :where] fsm :fsm-event)
    ```
 
-To satisfy the third requirement, we want:
+To satisfy the third requirement—actions for machines to dispatch events—we want:
 1. clj-statecharts actions that dispatch fixed re-frame events. We'll use these
    in state machines, in transition/entry/exit actions.
    ```clojure
